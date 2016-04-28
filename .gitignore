@@ -1,0 +1,12 @@
+# Compiled Source #
+##################
+*.out
+
+# Packages #
+############
+*.zip
+
+# Buffers #
+###########
+*.me
+*.*~
