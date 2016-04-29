@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
-#include <cstdlib>
+//#include <cstdlib>
 #include <sstream>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,6 +11,10 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netdb.h>
+/* Open SSL headers */
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 using namespace std;
 
@@ -18,7 +22,7 @@ struct url_p{
     const char * host;
     const char * port;
     const char * path;
-    //const char * service;
+    bool secure;
 };
 
 int main(int argc, char * argv[]){
@@ -49,11 +53,19 @@ int main(int argc, char * argv[]){
   }else{
     hostSplit = token.find('/');
     hostSplit!=string::npos ? host = token.substr(0,hostSplit) : host = token;
-    service.compare("https")==0 ? port="443" : port="80";
+    if(service.compare("https")==0){
+      port="443";
+      parsed.secure = true;
+      SSL_library_init();
+      SSL_load_error_strings();
+    }else{
+      port="80";
+      secure = false;
+    }
   }
   hostSplit=token.find('/');
   hostSplit!=string::npos ? path = token.substr(hostSplit) : path="";
-  //cout << path << endl;
+
   parsed.host = host.c_str();
   parsed.path = path.c_str();
   parsed.port = port.c_str();
