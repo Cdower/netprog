@@ -27,7 +27,7 @@ struct url_p{
 
 int main(int argc, char * argv[]){
   url_p parsed;
-  char queryHost[512];
+  char queryHost[256];
   struct addrinfo *first, hints, *i;
   int sockfd, ret;
   if(argc < 2){
@@ -108,15 +108,12 @@ int main(int argc, char * argv[]){
   ///End sendRequest
   ///Begin listenResponse//listenResponse(sockfd);
   char buf[1024];
-  char * headerEnd = NULL;
-  int len, flags = 0;
-  int total = 2147483647; //INTMAX
+  int len, total = 2147483647; //INTMAX
 
   cout << "Recieved: " << endl;
   while( (len = recv(sockfd, buf, sizeof(buf)-1, 0)) > 0 && total > 0){
     buf[len] = '\0';
     cout << buf << endl;
-    headerEnd = strstr(buf, "\r\n\r\n");
     memset(buf, 0, len);
   }
   fclose(stdout);
