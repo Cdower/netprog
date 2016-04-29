@@ -27,7 +27,7 @@ struct url_p{
 
 int main(int argc, char * argv[]){
   url_p parsed;
-  char queryPath[512], queryHost[256], queryPort[20];
+  char queryHost[512];
   struct addrinfo *first, hints, *i;
   int sockfd, ret;
   if(argc < 2){
@@ -48,8 +48,7 @@ int main(int argc, char * argv[]){
   if(hostSplit != string::npos){
     host = token.substr(0,hostSplit);
     port = token.substr(hostSplit+1);
-    hostSplit=port.find('/');
-    hostSplit != string::npos ? (port = port.substr(0,hostSplit) ) : (port = port) ;
+    (hostSplit=port.find('/')) != string::npos ? (port = port.substr(0,hostSplit) ) : (port = port) ;
   }else{
     hostSplit = token.find('/');
     hostSplit!=string::npos ? host = token.substr(0,hostSplit) : host = token;
@@ -60,20 +59,16 @@ int main(int argc, char * argv[]){
       SSL_load_error_strings();
     }else{
       port="80";
-      secure = false;
+      parsed.secure = false;
     }
   }
-  hostSplit=token.find('/');
-  hostSplit!=string::npos ? path = token.substr(hostSplit) : path="";
+  (hostSplit=token.find('/')) != string::npos ? path = token.substr(hostSplit) : path="";
 
   parsed.host = host.c_str();
   parsed.path = path.c_str();
   parsed.port = port.c_str();
-  //End parseURL
-
-  strcpy(queryPath, parsed.path);
   strcpy(queryHost, parsed.host);
-  strcpy(queryPort, parsed.port);
+  //End parseURL
   //Begin connect to host
   int lenHost = strlen(parsed.host), lenPort = strlen(parsed.port);
   char *host_c  = new char[lenHost+1](), *port_c = new char[lenPort+1]();
