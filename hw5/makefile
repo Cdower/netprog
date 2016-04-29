@@ -5,4 +5,5 @@ target: HTTP\(S\)client.cpp
 
 run: HTTP\(S\)client.cpp
 	g++ -o $(PROGRAM_NAME) HTTP\(S\)client.cpp -lcrypto -lssl
+	./$(PROGRAM_NAME) http://www.google.com/about.html
 	./$(PROGRAM_NAME) https://www.google.com/about.html
