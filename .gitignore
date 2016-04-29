@@ -1,6 +1,7 @@
 # Compiled Source #
 ##################
 *.out
+*.o
 
 # Packages #
 ############
