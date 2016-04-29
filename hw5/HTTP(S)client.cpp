@@ -53,7 +53,7 @@ int main(int argc, char * argv[]){
     host = token.substr(0,hostSplit);
     port = token.substr(hostSplit+1);
     (hostSplit=port.find('/')) != string::npos ? (port = port.substr(0,hostSplit) ) : (port = port);
-    if(port.compare("443")!=0){
+    if(port.compare("443")==0){
       parsed.secure = true;
     }else { parsed.secure = false; }
   }else{
