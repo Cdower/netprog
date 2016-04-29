@@ -21,129 +21,6 @@ struct url_p{
     //const char * service;
 };
 
-int parseURL(char * URL, url_p& parsed){
-    int hostSplit;
-    string host, port, token, path;//, service;
-    string sURL(URL);
-    token = sURL.substr(sURL.find("www"));
-    hostSplit = token.find(":");
-
-    if(hostSplit != string::npos){
-        host = token.substr(0,hostSplit);
-        port = token.substr(hostSplit+1);
-        port = port.substr(0,port.find('/'));
-    }else{
-        port = "80";
-        host = token.substr(0,token.find('/'));
-    }
-    path = token.substr(token.find('/'));
-
-    parsed.host = host.c_str();
-    parsed.path = path.c_str();
-    parsed.port = port.c_str();
-
-    return EXIT_SUCCESS;
-}
-
-///Makes TCP Socket Connection
-//Returns addrinfo of connection by reference
-int connectToHost(url_p parsed, struct addrinfo *first){
-    int sockfd, ret, lenHost, lenPort;
-    char *host, *port;
-    struct addrinfo hints, *i;
-    lenHost = strlen(parsed.host);
-    lenPort = strlen(parsed.port);
-    host = new char[lenHost+1]();
-    port = new char[lenPort+1]();
-    strncpy(host, parsed.host, lenHost);
-    strncpy(port, parsed.port, lenPort);
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-
-    ///Initialize & Connect TCP Socket
-    ret = getaddrinfo(host, port, &hints, &first);
-    if(ret != 0){
-        fprintf(stderr, "getaddrinfo() failed: %s\n", gai_strerror(ret));
-        exit(1);
-    }
-
-    for(i=first; i!= NULL; i=i->ai_next){
-        if((sockfd = socket(i->ai_family, SOCK_DGRAM, 0)) == -1 ){
-            perror("socket");
-            continue;
-        }
-        bind(sockfd, (struct sockaddr *) i, sizeof(*i));
-        if( connect( sockfd, (i->ai_addr), i->ai_addrlen) == -1){
-            cout << "Connect Failure" << endl;
-            close(sockfd);
-            perror("connect");
-            continue;
-        }
-        break;
-    }
-    return sockfd;
-}
-
-int sendRequest(char* path, char* host, char* port, int sockfd){
-    string query = "GET ";
-    query.append(path);
-    query.append(" HTTP/1.1\r\nHost: ");
-    query.append(host); query.append(":"); query.append(port);
-    query.append("\r\n");
-    query.append("User-Agent: dowerc-netprog-hw3/1.0\r\n\r\n\0");
-    if(send(sockfd, query.c_str(), sizeof(query.c_str()), 0) < 0){
-        cout << "Not written: " << query << endl;
-    }else{cout << "Sent:\n" << query << endl;}
-    return 0;
-}
-
-int listenResponse(int sockfd){
-    char buf[1024];
-    char * headerEnd;
-    int len, flags = 0;
-    int total = 2147483647; //INTMAX
-
-    cout << "Recieved: " << endl;
-    while( (len = recv(sockfd, buf, sizeof(buf)-1, 0)) > 0 && total > 0){
-        buf[len] = '\0';
-        headerEnd = strstr(buf, "\r\n\r\n");
-        if(headerEnd != NULL && flags == 0){
-            //get headers to properrly set stderrr
-            int headerSize = headerEnd - buf;
-            char headers[headerSize + 5];
-            strncpy(headers, buf, headerSize);
-            snprintf(headers+headerSize, 5, "\r\n\r\n");
-            headers[headerSize+4] = '\0';
-            fwrite(headers, 1, sizeof(headers), stderr);
-
-            //
-            char* contentSize = strstr(headers, "Content-Size: ");
-            if(contentSize == NULL){ exit(1);}
-            contentSize = contentSize + strlen("Content=Size: ");
-            char * rnIndex = strstr(contentSize, "\r\n");
-            char length[rnIndex - contentSize + 1];
-            strncpy(length, contentSize, sizeof(length));
-            total = atoi(length);
-
-            //
-            fwrite(headerEnd+4, 1, len-headerSize-4, stdout);
-            fflush(stdout);
-            total = total-len;
-            flags = 1;
-        }
-        else{
-        //
-        fwrite(buf, 1, len, stdout);
-        fflush(stdout);
-        total=total-len;
-        }
-        memset(buf, 0, len);
-    }
-    cout << endl;
-    return 0;
-}
-
 int main(int argc, char * argv[]){
   url_p parsed;
   char queryPath[512], queryHost[256], queryPort[20];
@@ -234,7 +111,7 @@ int main(int argc, char * argv[]){
     cout << buf << endl;
     headerEnd = strstr(buf, "\r\n\r\n");
     memset(buf, 0, len);
-  }e
+  }
   fclose(stdout);
   close(sockfd);
 
