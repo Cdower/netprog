@@ -26,8 +26,6 @@ int parseURL(char * URL, url_p& parsed){
     string host, port, token, path;//, service;
     string sURL(URL);
     token = sURL.substr(sURL.find("www"));
-    /*service = sURL.substr(0,sURL.find("://"));
-    cout << service << endl;/**/
     hostSplit = token.find(":");
 
     if(hostSplit != string::npos){
@@ -84,7 +82,6 @@ int connectToHost(url_p parsed, struct addrinfo *first){
         }
         break;
     }
-    //ret = connect(sockfd, first->ai_addr, first->ai_addrlen);
     return sockfd;
 }
 
@@ -143,14 +140,6 @@ int listenResponse(int sockfd){
         }
         memset(buf, 0, len);
     }
-    /*len = recv(sockfd,buf, sizeof(buf)-1,0);
-    while(len > 0){
-        cout << buf << endl;
-        cout.write(buf, sizeof(len));
-        cout << endl;
-        memset(&buf[0], 0, sizeof(buf));
-        recv(sockfd,buf, 255,0);
-    }/**/
     cout << endl;
     return 0;
 }
@@ -165,7 +154,6 @@ int main(int argc, char * argv[]){
     exit(EXIT_FAILURE);
   }
   //Start parseURL
-  //parseURL(argv[1], parsed);
   size_t hostSplit;
   string host, port, token, path, service;
   string sURL(argv[1]);
@@ -185,9 +173,6 @@ int main(int argc, char * argv[]){
     hostSplit = token.find('/');
     hostSplit!=string::npos ? host = token.substr(0,hostSplit) : host = token;
     service.compare("https")==0 ? port="443" : port="80";
-    //true ? cout << "True" << endl : cout << "false" << endl;
-    //cout <<  host << endl;
-    //host = token.substr(0,hostSplit);
   }
   hostSplit=token.find('/');
   hostSplit!=string::npos ? path = token.substr(hostSplit) : path="";
@@ -200,7 +185,6 @@ int main(int argc, char * argv[]){
   strcpy(queryPath, parsed.path);
   strcpy(queryHost, parsed.host);
   strcpy(queryPort, parsed.port);
-  //sockfd = connectToHost(parsed, first);
   //Begin connect to host
   int lenHost = strlen(parsed.host), lenPort = strlen(parsed.port);
   char *host_c  = new char[lenHost+1](), *port_c = new char[lenPort+1]();
@@ -230,16 +214,6 @@ int main(int argc, char * argv[]){
     }
     break;
   }
-/*    struct sockaddr_in addr;
-  socklen_t addrlen = sizeof(addr);
-  getpeername(sockfd, (struct sockaddr *)&addr, &addrlen);
-  printf("%s\n", inet_ntoa(addr.sin_addr));
-  //end connect to host
-  if(sockfd == -1){
-      close(sockfd);
-      exit(EXIT_FAILURE);
-  }/**/
-
   //sendRequest(queryPath, queryHost, queryPort, sockfd);
   ///Begin sendRequest to build and send GET request
   char request[1024];
@@ -258,41 +232,9 @@ int main(int argc, char * argv[]){
   while( (len = recv(sockfd, buf, sizeof(buf)-1, 0)) > 0 && total > 0){
     buf[len] = '\0';
     cout << buf << endl;
-    headerEnd = strstr(buf, "\r\n\r\n");/*
-    if(headerEnd != NULL && flags == 0){
-      //get headers to properrly set stderrr
-      int headerSize = headerEnd - buf;
-      char headers[headerSize + 5];
-      strncpy(headers, buf, headerSize);
-      snprintf(headers+headerSize, 5, "\r\n\r\n");
-      headers[headerSize+4] = '\0';
-      fwrite(headers, 1, sizeof(headers), stderr);
-
-      //
-      char* contentSize = strstr(headers, "Content-Size: ");
-      if(contentSize == NULL) { exit(1); }
-      contentSize = contentSize + strlen("Content-Size: ");
-      cout << "Content-Length: " << contentSize << endl;
-      char * rnIndex = strstr(contentSize, "\r\n");
-      char length[rnIndex - contentSize + 1];
-      strncpy(length, contentSize, sizeof(length));
-      total = atoi(length);
-
-      //
-      fwrite(headerEnd+4, 1, len-headerSize-4, stdout);
-      fflush(stdout);
-      cout << headerSize << endl;
-      total = total-len;
-      flags = 1;
-    }
-    else{
-      fwrite(buf, 1, len, stdout);
-      fflush(stdout);
-      total=total-len;
-    }/**/
+    headerEnd = strstr(buf, "\r\n\r\n");
     memset(buf, 0, len);
-  }/**/
-  ///End listenResponse
+  }e
   fclose(stdout);
   close(sockfd);
 
